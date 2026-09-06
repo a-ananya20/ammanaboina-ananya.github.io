@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Playfair Display', 'Outfit', Georgia, serif;
+    --font-serif: 'Cormorant Garamond', Georgia, serif;
+    --font-handwriting: 'Caveat', cursive;
+    --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #faf6f0;
+    color: #4a4036;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+.font-display {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-serif-elegant {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-handwritten {
+  font-family: 'Caveat', cursive;
+}
+
+/* Soft pastel card shadows & glows */
+.shadow-soft {
+  box-shadow: 0 10px 30px -8px rgba(180, 155, 135, 0.2), 0 4px 12px -2px rgba(180, 155, 135, 0.1);
+}
+
+.shadow-soft-lg {
+  box-shadow: 0 20px 45px -12px rgba(160, 135, 115, 0.25), 0 8px 20px -4px rgba(160, 135, 115, 0.12);
+}
+
+.glow-candle {
+  filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.9));
+}
+
+.glow-pastel {
+  box-shadow: 0 0 30px 10px rgba(254, 215, 170, 0.35);
+}
+
+/* Custom delicate pastel scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f5eee4;
+}
+::-webkit-scrollbar-thumb {
+  background: #d8c6b4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #bfa892;
+}
+
+
