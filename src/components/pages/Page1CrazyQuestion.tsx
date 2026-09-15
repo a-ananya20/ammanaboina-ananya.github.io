@@ -24,10 +24,12 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
   const dodgeNoButton = () => {
     if (isAnswered) return;
 
-    // Pick random offsets within safe bounds
-    const maxOffset = 140;
+    // Pick random offsets within safe bounds for mobile and desktop
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
+    const maxOffset = isMobile ? 80 : 130;
+    const minDistance = isMobile ? 40 : 75;
     const randomAngle = Math.random() * 2 * Math.PI;
-    const distance = 80 + Math.random() * (maxOffset - 80);
+    const distance = minDistance + Math.random() * (maxOffset - minDistance);
 
     const newX = Math.cos(randomAngle) * distance;
     const newY = Math.sin(randomAngle) * distance;
@@ -62,13 +64,11 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
     }
   };
 
-  // When YES is clicked: choreograph the 6-step bear romance sequence
+  // When YES is clicked: bears immediately kiss and celebrate!
   const handleYesClick = () => {
     if (isAnswered) return;
     setIsAnswered(true);
-
-    // Step 1 & 2: Looking toward each other
-    setAnimationStep('looking');
+    setAnimationStep('kiss');
 
     // Play cheerful chime
     try {
@@ -91,27 +91,10 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
       // Audio optional
     }
 
-    // Step 3: Move closer
+    // Allow 2.6s for the kiss animation and celebration before transitioning
     setTimeout(() => {
-      setAnimationStep('closer');
-    }, 600);
-
-    // Step 4 & 5: Hug and kiss!
-    setTimeout(() => {
-      setAnimationStep('hug');
-    }, 1200);
-
-    setTimeout(() => {
-      setAnimationStep('kiss');
-    }, 1800);
-
-    // Step 6 & 7: Sparkles & smooth transition
-    setTimeout(() => {
-      setAnimationStep('complete');
-      setTimeout(() => {
-        onYesAnswered();
-      }, 1200);
-    }, 3400);
+      onYesAnswered();
+    }, 2600);
   };
 
   return (
@@ -120,27 +103,26 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
       id="page-1-crazy-question"
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-8 max-w-3xl mx-auto text-center"
     >
-      {/* Playful top badge */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#fef3c7] border border-[#fde68a] text-xs font-semibold text-[#92400e] shadow-xs mb-6"
-      >
-        <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
-        <span>{CRAZY_QUESTION_DATA.heading}</span>
-      </motion.div>
-
       {/* THE SAME BOY BEAR AND GIRL BEAR (Visual Centerpiece) */}
-      <div className="relative my-4 w-full flex justify-center items-center">
+      <div className="relative my-2 w-full flex flex-col justify-center items-center">
         <BearCouple
-          scene={
-            animationStep === 'hug' || animationStep === 'kiss' || animationStep === 'complete'
-              ? 'hug_kiss'
-              : 'question'
-          }
+          scene={isAnswered ? 'hug_kiss' : 'question'}
+          showNames={!isAnswered}
+          boyName="Mohan"
+          girlName="Ananya"
           className="scale-95 sm:scale-105"
         />
+
+        {/* Heading badge positioned directly below the bears */}
+        <motion.div
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-[#fef3c7] border border-[#fde68a] text-xs font-semibold text-[#92400e] shadow-xs mt-3 mb-1"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-[#f59e0b]" />
+          <span>{CRAZY_QUESTION_DATA.heading}</span>
+        </motion.div>
       </div>
 
       {/* The Question Card */}
@@ -159,7 +141,7 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
       </motion.div>
 
       {/* The Two Buttons: YES ❤️ and Unclickable Dodging NO 😈 */}
-      <div className="relative min-h-[120px] w-full max-w-md mx-auto flex items-center justify-center space-x-6 sm:space-x-8 pt-4">
+      <div className="relative min-h-[120px] w-full max-w-md mx-auto flex items-center justify-center space-x-3 sm:space-x-8 pt-4">
         {/* YES BUTTON (Clickable with glowing warmth) */}
         <motion.button
           id="btn-yes"
@@ -167,9 +149,9 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
           whileTap={{ scale: 0.95 }}
           onClick={handleYesClick}
           disabled={isAnswered}
-          className="relative group z-20 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full bg-gradient-to-r from-[#f43f5e] via-[#ec4899] to-[#fb7185] text-white font-bold text-base sm:text-lg shadow-lg hover:shadow-[0_0_30px_rgba(244,63,94,0.45)] transition-all cursor-pointer flex items-center space-x-2"
+          className="relative group z-20 px-5 sm:px-9 py-3 sm:py-4 rounded-full bg-gradient-to-r from-[#f43f5e] via-[#ec4899] to-[#fb7185] text-white font-bold text-sm sm:text-lg shadow-lg hover:shadow-[0_0_30px_rgba(244,63,94,0.45)] transition-all cursor-pointer flex items-center space-x-1.5 sm:space-x-2 shrink-0 active:scale-95"
         >
-          <Heart className="w-5 h-5 fill-current animate-pulse text-white" />
+          <Heart className="w-4 h-4 sm:w-5 sm:h-5 fill-current animate-pulse text-white" />
           <span>{CRAZY_QUESTION_DATA.yesButtonText}</span>
         </motion.button>
 
@@ -195,7 +177,7 @@ export const Page1CrazyQuestion: React.FC<Page1CrazyQuestionProps> = ({ onYesAns
                 dodgeNoButton();
               }}
               type="button"
-              className="px-6 py-3.5 rounded-full bg-[#f1f5f9] border border-[#cbd5e1] text-[#64748b] font-medium text-sm sm:text-base shadow-sm hover:bg-[#e2e8f0] transition-colors select-none cursor-pointer whitespace-nowrap"
+              className="px-4 sm:px-6 py-3 sm:py-3.5 rounded-full bg-[#f1f5f9] border border-[#cbd5e1] text-[#64748b] font-medium text-xs sm:text-base shadow-sm hover:bg-[#e2e8f0] transition-colors select-none cursor-pointer whitespace-nowrap active:scale-95"
             >
               {noButtonText}
             </button>

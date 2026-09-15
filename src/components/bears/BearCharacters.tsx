@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 
 export type BearEyeState = 'open' | 'closed' | 'wink' | 'sleepy' | 'hearts' | 'surprised';
 export type BearLookDir = 'left' | 'right' | 'center';
+export type BearSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'portrait' | 'portrait-sm';
 
 export interface BoyBearProps {
   pose?: 'idle' | 'happy' | 'shy' | 'holding_hands' | 'hug' | 'kiss' | 'study' | 'sleeping' | 'celebrating';
@@ -10,7 +11,7 @@ export interface BoyBearProps {
   blushing?: boolean;
   lookDirection?: BearLookDir;
   headphones?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: BearSize;
   className?: string;
   onClick?: () => void;
   id?: string;
@@ -22,13 +23,16 @@ export interface GirlBearProps {
   blushing?: boolean;
   lookDirection?: BearLookDir;
   headphones?: boolean;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: BearSize;
   className?: string;
   onClick?: () => void;
   id?: string;
 }
 
-const sizeMap = {
+const sizeMap: Record<BearSize, string> = {
+  xs: 'w-12 h-14 sm:w-16 sm:h-20',
+  'portrait-sm': 'w-[44px] h-[52px] min-[360px]:w-[50px] min-[360px]:h-[58px] min-[420px]:w-[58px] min-[420px]:h-[68px] sm:w-24 sm:h-28',
+  portrait: 'w-[54px] h-[62px] min-[360px]:w-[62px] min-[360px]:h-[72px] min-[420px]:w-[72px] min-[420px]:h-[84px] sm:w-28 sm:h-32 md:w-32 md:h-36',
   sm: 'w-24 h-28',
   md: 'w-32 h-36',
   lg: 'w-44 h-48',

@@ -2,9 +2,14 @@ export type PageId =
   | 'page1_question'
   | 'page2_choices'
   | 'page3_song'
-  | 'page4_open_when'
   | 'page5_birthday'
   | 'page6_future';
+
+export interface SongStanza {
+  id: number;
+  lines: string[];
+  meaning: string;
+}
 
 export interface AudioTrack {
   id: string;
@@ -15,23 +20,10 @@ export interface AudioTrack {
   description?: string;
 }
 
-export interface OpenWhenLetter {
-  id: string;
-  title: string;
-  shortLabel: string;
-  iconName: string;
-  stampColor: string;
-  envelopeColor: string;
-  date?: string;
-  theme: 'missing' | 'bad_day' | 'cant_sleep' | 'motivation' | 'angry' | 'love' | 'need_me';
-  content: string[];
-  psNote?: string;
-}
-
 export interface FutureSceneData {
   id: 'study' | 'career' | 'family';
   title: string;
-  subtitle: string;
+  subtitle?: string;
   description: string;
   caption: string;
 }

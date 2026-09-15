@@ -1,4 +1,4 @@
-import { AudioTrack, OpenWhenLetter, FutureLetterData } from '../types';
+import { FutureLetterData, SongStanza } from '../types';
 
 /**
  * =========================================================================
@@ -10,10 +10,10 @@ import { AudioTrack, OpenWhenLetter, FutureLetterData } from '../types';
 
 // --- 1. NAMES & NICKNAMES ---
 export const BOYFRIEND_DATA = {
-  name: "Alex",                  // ✏️ His real name
-  nickname: "handsome bear",     // ✏️ His cute nickname
+  name: "Mohan Kumar",                  // ✏️ His real name
+  nickname: "Kanna",     // ✏️ His cute nickname
   girlfriendNickname: "your puppy girl", // ✏️ Inside joke nickname
-  birthdayDate: "September 6",   // ✏️ His birthday
+  birthdayDate: "September 16",   // ✏️ His birthday
 };
 
 // --- 2. PAGE 1: THE CRAZY QUESTION ---
@@ -38,33 +38,24 @@ export const CRAZY_QUESTION_DATA = {
   yesCelebrationText: "HE SAID YES!! 🐻❤️🐻"
 };
 
-// --- 3. PAGE 2: THE FOUR CHOICES ---
+// --- 3. PAGE 2: THE THREE CHOICES ---
 export const CHOICES_PAGE_DATA = {
   header: "Okay... since you said yes. 🐻✨",
   subheader: "What do you want to see first?",
   choices: [
     {
       id: 'song' as const,
-      title: "Song & Voice Note",
-      tag: "🎵 MUSIC",
-      subtitle: "Something I sang and recorded just for you",
+      title: "Song",
+      tag: "🎵 CHAPTER 1",
+      subtitle: "Mandaara Mandaara lyrics & meanings",
       color: "from-[#fef3c7] to-[#fed7aa]",
       borderColor: "border-[#fde68a]",
       textColor: "text-[#92400e]"
     },
     {
-      id: 'openWhen' as const,
-      title: "Open When Letters",
-      tag: "💌 LETTERS",
-      subtitle: "7 handwritten letters for every possible mood",
-      color: "from-[#ede9fe] to-[#fae8ff]",
-      borderColor: "border-[#e9d5ff]",
-      textColor: "text-[#6b21a8]"
-    },
-    {
       id: 'birthday' as const,
       title: "Birthday Greeting",
-      tag: "🎂 CELEBRATION",
+      tag: "🎂 CHAPTER 2",
       subtitle: "Light the candles on your cake & read my wish",
       color: "from-[#fee2e2] to-[#ffedd5]",
       borderColor: "border-[#fecaca]",
@@ -73,7 +64,7 @@ export const CHOICES_PAGE_DATA = {
     {
       id: 'future' as const,
       title: "Future Us",
-      tag: "💫 FUTURE US",
+      tag: "💫 CHAPTER 3",
       subtitle: "Studying, dream jobs, our families, and a letter from 2027",
       color: "from-[#e0f2fe] to-[#dbeafe]",
       borderColor: "border-[#bae6fd]",
@@ -82,155 +73,156 @@ export const CHOICES_PAGE_DATA = {
   ]
 };
 
-// --- 4. PAGE 3: AUDIO TRACKS ---
-export const AUDIO_TRACKS = {
-  mySong: {
-    id: "my-song",
-    title: "My Song",
-    subtitle: "Something I made just for you 🎧",
-    // ✏️ Place your singing audio in /public/assets/audio/my-song.mp3
-    src: "/assets/audio/my-song.mp3",
-    durationSeconds: 184,
-    description: "Recorded softly with all my heart."
-  } as AudioTrack,
-  voiceMessage: {
-    id: "voice-message",
-    title: "Voice Message",
-    subtitle: "And now... something I wanted to tell you 🎙️",
-    // ✏️ Place your voice note in /public/assets/audio/voice-message.mp3
-    src: "/assets/audio/voice-message.mp3",
-    durationSeconds: 118,
-    description: "A little personal whisper across the distance."
-  } as AudioTrack
+/**
+ * Resolves static assets located in the public directory so they work correctly
+ * whether hosted on a custom domain, root GitHub Pages (https://a-ananya20.github.io/),
+ * or a repository subpath (https://a-ananya20.github.io/ammanaboina-ananya.github.io/).
+ */
+export const getPublicAssetUrl = (path: string): string => {
+  if (!path || path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  const clean = path.replace(/^\//, '');
+  const base = import.meta.env.BASE_URL || './';
+  return base.endsWith('/') ? `${base}${clean}` : `${base}/${clean}`;
 };
 
-// --- 5. PAGE 4: "OPEN WHEN..." LETTERS ---
-export const OPEN_WHEN_LETTERS: OpenWhenLetter[] = [
-  {
-    id: "missing-me",
-    title: "Open when you're missing me",
-    shortLabel: "Missing me",
-    iconName: "Heart",
-    stampColor: "#f472b6",
-    envelopeColor: "#fdf2f8",
-    theme: "missing",
-    content: [
-      "Hey you. 🐻",
-      "If you're opening this, I can already feel that quiet little ache of wanting to be in the same room.",
-      "Close your eyes for three seconds. Take a slow, deep breath. Can you feel how completely you are loved? Every single second we spend apart is just countdown time until the next time I get to jump on you and give you puppy hugs.",
-      "Look outside at the sky. Wherever you are, the same breeze is touching both of us.",
-      "I love you more than all the miles and minutes in the world."
-    ],
-    psNote: "P.S. Warning: When I see you next, you are getting at least 50 continuous hugs and maybe a puppy nose-boop! 🐾"
-  },
-  {
-    id: "bad-day",
-    title: "Open when you're having a bad day",
-    shortLabel: "Bad day",
-    iconName: "CloudRain",
-    stampColor: "#60a5fa",
-    envelopeColor: "#eff6ff",
-    theme: "bad_day",
-    content: [
-      "Drop your shoulders. Unclench your jaw. Take off your heavy shoes.",
-      "Today might have been exhausting, unfair, or frustrating. Maybe things didn't work out the way you wanted them to, or people were annoying. That is okay.",
-      "You don't have to carry the whole universe on your back today. You are allowed to be tired. You are allowed to rest.",
-      "Drink a glass of warm water, put on your softest clothes, and wrap yourself in a blanket. Tomorrow is a completely fresh start, and I believe in you with every fiber of my soul."
-    ],
-    psNote: "P.S. If anyone was mean to you today, let me know so I can bark at them loudly! 🐶"
-  },
-  {
-    id: "cant-sleep",
-    title: "Open when you can't sleep",
-    shortLabel: "Can't sleep",
-    iconName: "Moon",
-    stampColor: "#a78bfa",
-    envelopeColor: "#f5f3ff",
-    theme: "cant_sleep",
-    content: [
-      "Still wide awake at 2 AM with a brain that refuses to slow down?",
-      "Put your phone face-down after reading this. Stop replaying conversations or worrying about tomorrow's to-do list. The world will keep turning without your active supervision until morning.",
-      "Imagine us cozy under a giant soft duvet. The room is cool, the night is quiet, and my head is resting gently on your chest, rising and falling with your breath. You are completely safe and warm.",
-      "Rest your eyes now, handsome bear. I'll meet you in our dream world."
-    ],
-    psNote: "P.S. Counting sheep is boring; count how many cute bear hugs we're gonna share instead! 💤"
-  },
-  {
-    id: "need-motivation",
-    title: "Open when you need motivation",
-    shortLabel: "Motivation",
-    iconName: "Sparkles",
-    stampColor: "#fbbf24",
-    envelopeColor: "#fffbeb",
-    theme: "motivation",
-    content: [
-      "A quick reminder of who the heck you are:",
-      "You are brilliant, hardworking, thoughtful, and capable of things you haven't even dared to imagine yet. I watch you tackle hard things every day with quiet courage and dignity.",
-      "When self-doubt whispers in your ear, remember that growth never feels comfortable while it's happening. You are building something lasting, step by quiet step.",
-      "Straighten up your back, take a breath, and take that next step. You've got this, and I am in your corner cheering the loudest forever."
-    ],
-    psNote: "P.S. Your #1 fan is wagging her tail and rooting for you right now! ⭐"
-  },
-  {
-    id: "angry-with-me",
-    title: "Open when you're angry with me",
-    shortLabel: "Angry with me",
-    iconName: "Flame",
-    stampColor: "#fb7185",
-    envelopeColor: "#fff1f2",
-    theme: "angry",
-    content: [
-      "I am so sorry. 🥺",
-      "If I was stubborn, careless, or said something clumsy that hurt your feelings, please know from the bottom of my heart that hurting you is the absolute last thing I ever want to do.",
-      "Even when we disagree, my love and admiration for you never waver. You are my partner, my teammate, and my favorite person.",
-      "Take whatever quiet space you need to cool down. Whenever you're ready, come talk to me. I'm ready to listen with an open heart so we can be us again."
-    ],
-    psNote: "P.S. I promise not to bite (unless it's an affectionate playful nibble later after we make up!) 🐻❤️"
-  },
-  {
-    id: "how-much-i-love-you",
-    title: "Open when you want to know how much I love you",
-    shortLabel: "How much I love you",
-    iconName: "HeartHandshake",
-    stampColor: "#ec4899",
-    envelopeColor: "#fdf2f8",
-    theme: "love",
-    content: [
-      "How much do I love you?",
-      "I love you in the quiet mornings when you're still sleepy and your hair is a mess. I love you when you're intensely focused on something you care about with that cute furrow between your brows.",
-      "I love you when we laugh until our ribs ache, and I love you when we're just sitting together in comfortable silence, doing our own things in the same warm room.",
-      "It is a steady, gentle, stubborn love that only grows deeper with every single memory we make together."
-    ],
-    psNote: "P.S. Scientifically proven to be bigger than all galaxies combined! 🐾"
-  },
-  {
-    id: "need-me",
-    title: "Open when you need me",
-    shortLabel: "Need me",
-    iconName: "PhoneCall",
-    stampColor: "#34d399",
-    envelopeColor: "#ecfdf5",
-    theme: "need_me",
-    content: [
-      "No matter what time it is, no matter what is going on — pick up your phone and call me.",
-      "Never think that you are bothering me, that it's too late, or that what you're going through is 'too small'. If it matters to you, it matters to me.",
-      "If you need to vent, I'll listen. If you need a laugh, I'll act silly. If you just need someone on the other end of the line while you breathe, I'll stay right there.",
-      "You are never alone in this world. I am always holding your hand."
-    ],
-    psNote: "P.S. One call = instant virtual bear hug delivered! 🐻"
-  }
-];
+// --- 4. PAGE 3: SONG LYRICS ("Mandaara Mandaara") ---
+export const SONG_LYRICS_DATA = {
+  title: "Mandaara Mandaara",
+  subtitle: "Lyrics & Meanings",
+  stanzas: [
+    {
+      id: 1,
+      lines: [
+        "Mandaara mandaara",
+        "Karige thellaarela",
+        "Kiranaale nanne cherela"
+      ],
+      meaning: "Just like the darkness of night slowly disappears and sunlight reaches me, you came into my life and brought light into it."
+    },
+    {
+      id: 2,
+      lines: [
+        "Kallara kallara",
+        "Choosthunna kallara",
+        "Sarikottha sneham dharichera"
+      ],
+      meaning: "When I look at you, I realize that I have found a completely new and beautiful relationship."
+    },
+    {
+      id: 3,
+      lines: [
+        "Alikidi chese naalo",
+        "Adagani prashne edho",
+        "Asaladhi badhulo emo",
+        "Adhi thelena"
+      ],
+      meaning: "Something is happening inside me. I have a question in my heart, but I don't even know what the question is or what the answer is."
+    },
+    {
+      id: 4,
+      lines: [
+        "Kudhurugaa unde madhilo",
+        "Chilipigaa egire edhalo",
+        "Theliyani bhaavam thelise",
+        "Katha maarena"
+      ],
+      meaning: "My heart used to be calm, but now something playful and exciting is happening inside me. I have discovered a feeling I never knew before. Has my life changed because of this feeling?"
+    },
+    {
+      id: 5,
+      lines: [
+        "Oh nee venta aduge vesthu",
+        "Nee needanai gamanisthu",
+        "Naa ninnalloleni nanne ilaaga",
+        "Neelo chusthunnaaaa"
+      ],
+      meaning: "As I walk beside you and stay with you like your shadow, I am discovering a new version of myself through you — someone I never was before."
+    },
+    {
+      id: 6,
+      lines: [
+        "Mandaara mandaara",
+        "Karige thellaarelaaga",
+        "Aa kiranaale nanne cherela",
+        "",
+        "Kallaara kallaaraa",
+        "Chusthunnaavaa kallaara",
+        "Ee sarikottha sneham darichera"
+      ],
+      meaning: "Like the night fading into morning and sunlight reaching me, you came into my life. When I look at you, I realize that I've found this beautiful new bond."
+    },
+    {
+      id: 7,
+      lines: [
+        "Sundara.. Mandaara",
+        "Kallaara.. Sundara"
+      ],
+      meaning: "Beautiful one."
+    },
+    {
+      id: 8,
+      lines: [
+        "Unikini chaate oopiri koodaa",
+        "Uliki padelaa undhe ilaa"
+      ],
+      meaning: "Even my very existence and my breath feel different because of what I'm feeling."
+    },
+    {
+      id: 9,
+      lines: [
+        "Kalalonainaa kalaganaledhe",
+        "Vidipothundhani aramarikaa"
+      ],
+      meaning: "I never even imagined that we could be apart."
+    },
+    {
+      id: 10,
+      lines: [
+        "Kadalai naalo nuvve",
+        "Alanai neelo neney"
+      ],
+      meaning: "You are like an ocean within me, and I am like a wave within you."
+    },
+    {
+      id: 11,
+      lines: [
+        "Okatai odhige kshaname",
+        "Adhi premenaaa?"
+      ],
+      meaning: "When we became so deeply connected, was that what love is?"
+    },
+    {
+      id: 12,
+      lines: [
+        "Kaalaalane maripisthu",
+        "Aanandhame andhisthu"
+      ],
+      meaning: "When I'm with you, I forget about time, and you fill my life with happiness."
+    },
+    {
+      id: 13,
+      lines: [
+        "Naa prayaanamai",
+        "Naa gamyanivai",
+        "Naa nuvvavuthunnaave"
+      ],
+      meaning: "You have become my journey, and you have become my destination. You are becoming such an important part of my life that you are becoming a part of me."
+    }
+  ] as SongStanza[]
+};
 
-// --- 6. PAGE 5: BIRTHDAY GREETING & CANDLES ---
+// --- 5. PAGE 5: BIRTHDAY GREETING & CANDLES ---
 export const BIRTHDAY_DATA = {
   cakePrompt: "Light them up.",
   candlesPromptSubtitle: "Tap the candles on the cake to light each flame! 🕯️",
-  celebrationTitle: "Happy Birthday My Love! ❤️🎂",
+  celebrationTitle: "Happy Birthday Kannalu! ❤️🎂",
   greetingText: [
-    "Happy Birthday to my favorite person in the entire universe! 🐻✨",
-    "Today is the day the world was blessed with you, and my life became infinitely warmer, softer, and sweeter the day you walked into it.",
-    "Thank you for your patient smiles, your warm hugs, your steady presence, and the way you always make me feel safe, cherished, and free to be my goofiest self.",
-    "May this year bring you endless laughter, thrilling victories, delicious food, peaceful nights, and all the dreams your heart has been quietly wishing for."
+    "A Happy Happy Birthday to Mohan Kumar 🐻✨",
+    "happy happy birthday to the man who say m kadu nenu nerpistha, nenu unna kada, manam manchiga undam, Na pellama, kannamma i love u raa, yekuva overthink cheyaku, antha manchiga aythadi. ",
+    "Thank You for everything kanna nuv na life lo ochinanduku if not u no one could have been in ur place laga aypoinandhuku, ne matalaki, ne kathalaki, ne pichi stories ki, ne opika ki, ne jokes ki, ne naughty pannulu ki, ne smile ki, ne alochana ki literally antiki.",
+    "May this year bring you good health, endless laughter, thrilling victories and all the dreams your heart has been quietly wishing for."
   ],
   bearEasterEggHint: "💡 Tip: Try tapping on Girl Bear or Boy Bear for a sweet surprise!",
   girlBearKissText: "Girl bear leans in and gives boy bear a sweet birthday kiss! 💋",
@@ -242,36 +234,42 @@ export const FUTURE_SCENES = [
   {
     id: 'study' as const,
     title: "1. Studying Together",
-    subtitle: "Late nights, notebooks & quiet support",
-    description: "Sitting side by side at our cozy wooden desk with warm lamp glow, turning pages, sipping warm tea, and secretly holding hands underneath the table while working hard.",
-    caption: "Holding hands under the table while chasing our goals 📖"
+    description: "Sitting, studying, turning pages, sipping warm water and tea, and secretly holding hands underneath the table while working hard.",
+    caption: "Educating and supporting each other"
   },
   {
     id: 'career' as const,
     title: "2. Dream Job",
     subtitle: "Reaching our goals side by side",
     description: "After all the hard work and perseverance, celebrating each other's career milestones. Proudly cheering for your achievements and knowing we built this future together.",
-    caption: "Proudly celebrating your dream job and our victories 💼🎉"
+    caption: "Proudly celebrating your dream job and our Youtube victories 💼🎉"
   },
   {
     id: 'family' as const,
     title: "3. Our Families Together",
-    subtitle: "One big, beautiful bear family portrait",
-    description: "All of us together in one warm, happy family portrait: Dad Bear, Mom Bear, Brother Bear, Sister Bear, and the two of us right at the center, surrounded by love, laughter, and lifelong togetherness.",
+    subtitle: "One big, beautiful family portrait",
+    description: "All of us together in one warm, happy family portrait: Nanna, Amma, Athamma, Mammaya, Thamudu, Akka and the two of us right at the center, surrounded by love, laughter, and lifelong togetherness.",
     caption: "Our whole family gathered close together in one portrait 🐻📸❤️"
   }
 ];
 
 export const FUTURE_LETTER_DATA: FutureLetterData = {
-  date: "September 6, 2027",
-  salutation: "Dear you,",
+  date: "September 16, 2027",
+  salutation: "Dear us,",
   paragraphs: [
-    "I wonder what you are doing as you read this in 2027.",
-    "Did we get that cozy apartment with the big window and the sunny corner? Have we taken that trip we spent late nights sketching out on our phones? Did you get that dream job you were quietly working towards when I built this website?",
-    "I'm writing this across time because some things are so certain that even years cannot alter them: my faith in you, my gratitude for your presence in my life, and the peace I feel whenever you hold my hand.",
-    "Look at the person sitting beside you — or across from you right now. Loving you has always been the easiest, warmest, and most natural choice of my life.",
-    "Here's to every chapter ahead, written day by day, hand in hand."
+    "We actually made it this far.Right now, we are still figuring out so many things.Careers, money, responsibilities, our future...Sometimes we know exactly what we want, and sometimes we are just pretending that we have everything figured out.",
+    "But one thing I hope hasn't changed..  Us.",
+    "I hope we still talk about the most random things.I hope we still laugh at stupid jokes that nobody else understands.I hope you still irritate me for absolutely no reason And I hope I still irritate you even more.",
+    "I wonder what our life looks like now.Did we achieve the things we were worried about? Did we build the kind of life we imagined? I hope life taught us to be patient with each other.",
+    "I hope we learned that love isn't just about good days, birthdays, surprises and cute moments.It's also about staying when things get difficult.Listening when the other person doesn't know how to explain what's wrong.Giving space when it's needed. Saying sorry when we're wrong.And choosing each other even after seeing each other's worst moods, worst habits and worst decisions.",
+    "I don't expect our future to be perfect.There will probably be arguments.There will be stressful days.There will be times when one of us feels lost. But whenever that happens, I hope we remember each other.",
+    "And I hope we each other... Don't worry. We figured it out together.If life has changed us, I hope it changed us for the better.If our dreams changed, I hope we found new ones together.And if things didnot go exactly according to plan...I hope we still have each other and can say Okay... plan B.",
+    "So, future us...If you're reading this, please remember one thing.Don't take what we have for granted.",
+    "Whatever our future looks like, I just hope when we look back at this version of ourselves.we smile.Because these were the days when we were still dreaming about our future.",
+    "And somehow.we became that future.",
+    "With love",
+    
   ],
-  signOff: "Forever your loving bear (and dog-girl),",
+  signOff: "Forever your Kannamma,",
   postScript: "P.S. Happy Birthday, my love. Forever in your corner. ❤️"
 };

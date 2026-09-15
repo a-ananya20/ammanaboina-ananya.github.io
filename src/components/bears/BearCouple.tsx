@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BoyBear, GirlBear } from './BearCharacters';
 import { FamilyPortrait } from './FamilyPortrait';
@@ -21,6 +21,9 @@ interface BearCoupleProps {
   isPlayingMusic?: boolean;
   onBearClick?: (bear: 'boy' | 'girl') => void;
   className?: string;
+  showNames?: boolean;
+  boyName?: string;
+  girlName?: string;
 }
 
 export const BearCouple: React.FC<BearCoupleProps> = ({
@@ -29,11 +32,43 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
   isPlayingMusic = false,
   onBearClick,
   className = '',
+  showNames = false,
+  boyName = 'Mohan',
+  girlName = 'Ananya',
 }) => {
   const [internalKissTrigger, setInternalKissTrigger] = useState(false);
+  const [boyHovered, setBoyHovered] = useState(false);
+  const [girlHovered, setGirlHovered] = useState(false);
+  const [boyClicked, setBoyClicked] = useState(false);
+  const [girlClicked, setGirlClicked] = useState(false);
+
+  const boyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const girlTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (boyTimerRef.current) clearTimeout(boyTimerRef.current);
+      if (girlTimerRef.current) clearTimeout(girlTimerRef.current);
+    };
+  }, []);
+
+  const triggerBoyPopup = () => {
+    if (!showNames) return;
+    setBoyClicked(true);
+    if (boyTimerRef.current) clearTimeout(boyTimerRef.current);
+    boyTimerRef.current = setTimeout(() => setBoyClicked(false), 3200);
+  };
+
+  const triggerGirlPopup = () => {
+    if (!showNames) return;
+    setGirlClicked(true);
+    if (girlTimerRef.current) clearTimeout(girlTimerRef.current);
+    girlTimerRef.current = setTimeout(() => setGirlClicked(false), 3200);
+  };
 
   // Handle click on Girl Bear -> Kiss Boy Bear!
   const handleGirlClick = () => {
+    triggerGirlPopup();
     if (onBearClick) {
       onBearClick('girl');
     } else if (interactive) {
@@ -44,6 +79,7 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
 
   // Handle click on Boy Bear
   const handleBoyClick = () => {
+    triggerBoyPopup();
     if (onBearClick) {
       onBearClick('boy');
     }
@@ -104,107 +140,112 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
 
       {/* 1. SCENE: STUDYING TOGETHER */}
       {scene === 'studying' && (
-        <div className="relative flex flex-col items-center">
-          {/* Desk with study elements */}
-          <div className="relative flex items-end justify-center space-x-2 sm:space-x-4">
-            <BoyBear
-              pose="study"
-              eyeState="open"
-              lookDirection="right"
-              size="md"
-              blushing={true}
-              onClick={handleBoyClick}
-            />
+        <div className="relative flex flex-col items-center w-full max-w-full overflow-hidden">
+          {/* Responsive scaled container for phone view so bears are fully visible and away from edges */}
+          <div className="transform scale-[0.74] min-[390px]:scale-[0.84] sm:scale-100 origin-center flex flex-col items-center">
+            {/* Desk with study elements */}
+            <div className="relative flex items-end justify-center space-x-1 sm:space-x-4">
+              <BoyBear
+                pose="study"
+                eyeState="open"
+                lookDirection="right"
+                size="md"
+                blushing={true}
+                onClick={handleBoyClick}
+              />
 
-            {/* Cozy Desk Table */}
-            <div className="relative -mx-6 z-10 w-52 sm:w-64 h-16 bg-[#e2ceb8] border-2 border-[#b59d84] rounded-t-xl shadow-md flex items-center justify-between px-3">
-              {/* Stack of books */}
-              <div className="flex flex-col space-y-0.5">
-                <div className="w-9 h-2.5 bg-[#60a5fa] rounded-xs border border-[#3b82f6]" />
-                <div className="w-11 h-2.5 bg-[#f472b6] rounded-xs border border-[#ec4899]" />
-                <div className="w-12 h-3 bg-[#34d399] rounded-xs border border-[#059669]" />
-              </div>
-
-              {/* Cute Desk Lamp */}
-              <div className="relative flex flex-col items-center">
-                <div className="w-6 h-5 bg-[#fbbf24] rounded-t-full shadow-[0_0_12px_rgba(251,191,36,0.6)]" />
-                <div className="w-1 h-6 bg-[#78716c]" />
-                <div className="w-5 h-1.5 bg-[#57534e] rounded-full" />
-              </div>
-
-              {/* Notebook & Mug */}
-              <div className="flex items-center space-x-2">
-                <div className="w-10 h-8 bg-[#fafaf9] rounded border border-[#d6d3d1] p-1 shadow-2xs text-[6px] text-[#a8a29e] leading-tight">
-                  <div className="w-full h-0.5 bg-[#cbd5e1] mb-1" />
-                  <div className="w-3/4 h-0.5 bg-[#cbd5e1] mb-1" />
-                  <div className="w-1/2 h-0.5 bg-[#cbd5e1]" />
+              {/* Cozy Desk Table */}
+              <div className="relative -mx-6 z-10 w-48 sm:w-64 h-16 bg-[#e2ceb8] border-2 border-[#b59d84] rounded-t-xl shadow-md flex items-center justify-between px-3">
+                {/* Stack of books */}
+                <div className="flex flex-col space-y-0.5">
+                  <div className="w-9 h-2.5 bg-[#60a5fa] rounded-xs border border-[#3b82f6]" />
+                  <div className="w-11 h-2.5 bg-[#f472b6] rounded-xs border border-[#ec4899]" />
+                  <div className="w-12 h-3 bg-[#34d399] rounded-xs border border-[#059669]" />
                 </div>
-                <div className="w-4 h-5 bg-[#fbcfe8] rounded-t border border-[#f472b6] text-[7px] text-center">
-                  ☕
+
+                {/* Cute Desk Lamp */}
+                <div className="relative flex flex-col items-center">
+                  <div className="w-6 h-5 bg-[#fbbf24] rounded-t-full shadow-[0_0_12px_rgba(251,191,36,0.6)]" />
+                  <div className="w-1 h-6 bg-[#78716c]" />
+                  <div className="w-5 h-1.5 bg-[#57534e] rounded-full" />
+                </div>
+
+                {/* Notebook & Mug */}
+                <div className="flex items-center space-x-2">
+                  <div className="w-10 h-8 bg-[#fafaf9] rounded border border-[#d6d3d1] p-1 shadow-2xs text-[6px] text-[#a8a29e] leading-tight">
+                    <div className="w-full h-0.5 bg-[#cbd5e1] mb-1" />
+                    <div className="w-3/4 h-0.5 bg-[#cbd5e1] mb-1" />
+                    <div className="w-1/2 h-0.5 bg-[#cbd5e1]" />
+                  </div>
+                  <div className="w-4 h-5 bg-[#fbcfe8] rounded-t border border-[#f472b6] text-[7px] text-center">
+                    ☕
+                  </div>
                 </div>
               </div>
+
+              <GirlBear
+                pose="study"
+                eyeState="open"
+                lookDirection="left"
+                size="md"
+                blushing={true}
+                onClick={handleGirlClick}
+              />
             </div>
 
-            <GirlBear
-              pose="study"
-              eyeState="open"
-              lookDirection="left"
-              size="md"
-              blushing={true}
-              onClick={handleGirlClick}
-            />
+            {/* Under-the-table Secret Hand Holding Callout */}
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              className="mt-3 px-3 py-1 rounded-full bg-[#fef3c7] border border-[#fde68a] text-xs text-[#92400e] font-medium flex items-center space-x-1.5 shadow-2xs whitespace-nowrap"
+            >
+              <span className="text-sm">🤝</span>
+              <span>Secretly holding hands under the study table</span>
+            </motion.div>
           </div>
-
-          {/* Under-the-table Secret Hand Holding Callout */}
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-3 px-3 py-1 rounded-full bg-[#fef3c7] border border-[#fde68a] text-xs text-[#92400e] font-medium flex items-center space-x-1.5 shadow-2xs"
-          >
-            <span className="text-sm">🤝</span>
-            <span>Secretly holding hands under the study table</span>
-          </motion.div>
         </div>
       )}
 
       {/* 2. SCENE: CAREER & DREAMS CELEBRATION */}
       {scene === 'career' && (
-        <div className="relative flex items-center justify-center space-x-4">
-          <motion.div
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <BoyBear
-              pose="celebrating"
-              eyeState="wink"
-              size="md"
-              blushing={true}
-              lookDirection="right"
-              onClick={handleBoyClick}
-            />
-          </motion.div>
+        <div className="relative flex flex-col items-center w-full max-w-full overflow-hidden">
+          <div className="transform scale-[0.78] min-[390px]:scale-[0.88] sm:scale-100 origin-center flex items-center justify-center space-x-2 sm:space-x-4">
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <BoyBear
+                pose="celebrating"
+                eyeState="wink"
+                size="md"
+                blushing={true}
+                lookDirection="right"
+                onClick={handleBoyClick}
+              />
+            </motion.div>
 
-          <div className="flex flex-col items-center text-center px-2">
-            <span className="text-2xl animate-bounce">🏆</span>
-            <span className="text-xs font-bold text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded-full border border-[#fde68a] mt-1">
-              Dreams Reached!
-            </span>
+            <div className="flex flex-col items-center text-center px-1 sm:px-2">
+              <span className="text-2xl animate-bounce">🏆</span>
+              <span className="text-xs font-bold text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded-full border border-[#fde68a] mt-1 whitespace-nowrap">
+                Dreams Reached!
+              </span>
+            </div>
+
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
+            >
+              <GirlBear
+                pose="celebrating"
+                eyeState="happy"
+                size="md"
+                blushing={true}
+                lookDirection="left"
+                onClick={handleGirlClick}
+              />
+            </motion.div>
           </div>
-
-          <motion.div
-            animate={{ y: [0, -4, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', delay: 0.3 }}
-          >
-            <GirlBear
-              pose="celebrating"
-              eyeState="happy"
-              size="md"
-              blushing={true}
-              lookDirection="left"
-              onClick={handleGirlClick}
-            />
-          </motion.div>
         </div>
       )}
 
@@ -225,17 +266,49 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
                 ? { y: [0, -2, 0], rotate: [0, 1, 0] }
                 : { x: 0, rotate: 0 }
             }
-            transition={{ type: 'spring', damping: 18, stiffness: 200 }}
-            className="z-10"
+            transition={
+              isPlayingMusic
+                ? { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }
+                : { type: 'spring', damping: 18, stiffness: 200 }
+            }
+            className={`z-10 relative ${showNames ? 'cursor-pointer' : ''}`}
+            onMouseEnter={() => {
+              if (showNames) setBoyHovered(true);
+            }}
+            onMouseLeave={() => {
+              if (showNames) setBoyHovered(false);
+            }}
+            onClick={handleBoyClick}
+            whileHover={showNames ? { scale: 1.04 } : undefined}
+            whileTap={showNames ? { scale: 0.96 } : undefined}
           >
+            {/* POPUP FOR BOY BEAR (MOHAN) */}
+            <AnimatePresence>
+              {showNames && (boyHovered || boyClicked) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.75 }}
+                  animate={{ opacity: 1, y: -8, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.8 }}
+                  transition={{ type: 'spring', damping: 16, stiffness: 350 }}
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center select-none"
+                >
+                  <div className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#1e40af] via-[#2563eb] to-[#3b82f6] text-white shadow-xl border-2 border-[#bfdbfe] whitespace-nowrap">
+                    <span className="font-bold text-xs sm:text-sm tracking-wide drop-shadow-xs">{boyName}</span>
+                    <span className="text-xs">🐻</span>
+                  </div>
+                  {/* Speech bubble pointer arrow */}
+                  <div className="w-2.5 h-2.5 bg-[#2563eb] border-r-2 border-b-2 border-[#bfdbfe] rotate-45 -mt-1 shadow-xs" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <BoyBear
               pose={isKissing ? 'kiss' : scene === 'birthday' ? 'holding_hands' : 'idle'}
               eyeState={isKissing ? 'closed' : isPlayingMusic ? 'closed' : 'open'}
-              blushing={isKissing || scene === 'birthday'}
+              blushing={isKissing || scene === 'birthday' || (showNames && (boyHovered || boyClicked))}
               lookDirection="right"
               headphones={scene === 'headphones' || scene === 'headphones_kiss'}
               size="lg"
-              onClick={handleBoyClick}
             />
           </motion.div>
 
@@ -282,9 +355,42 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
                 ? { y: [0, -2, 0], rotate: [0, -1, 0] }
                 : { x: 0, rotate: 0 }
             }
-            transition={{ type: 'spring', damping: 18, stiffness: 200 }}
-            className="z-20"
+            transition={
+              isPlayingMusic
+                ? { duration: 1.6, repeat: Infinity, ease: 'easeInOut' }
+                : { type: 'spring', damping: 18, stiffness: 200 }
+            }
+            className={`z-20 relative ${showNames ? 'cursor-pointer' : ''}`}
+            onMouseEnter={() => {
+              if (showNames) setGirlHovered(true);
+            }}
+            onMouseLeave={() => {
+              if (showNames) setGirlHovered(false);
+            }}
+            onClick={handleGirlClick}
+            whileHover={showNames ? { scale: 1.04 } : undefined}
+            whileTap={showNames ? { scale: 0.96 } : undefined}
           >
+            {/* POPUP FOR GIRL BEAR (ANANYA) */}
+            <AnimatePresence>
+              {showNames && (girlHovered || girlClicked) && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.75 }}
+                  animate={{ opacity: 1, y: -8, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.8 }}
+                  transition={{ type: 'spring', damping: 16, stiffness: 350 }}
+                  className="absolute -top-12 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center select-none"
+                >
+                  <div className="flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#be185d] via-[#db2777] to-[#ec4899] text-white shadow-xl border-2 border-[#fbcfe8] whitespace-nowrap">
+                    <span className="font-bold text-xs sm:text-sm tracking-wide drop-shadow-xs">{girlName}</span>
+                    <span className="text-xs">🌸</span>
+                  </div>
+                  {/* Speech bubble pointer arrow */}
+                  <div className="w-2.5 h-2.5 bg-[#db2777] border-r-2 border-b-2 border-[#fbcfe8] rotate-45 -mt-1 shadow-xs" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <GirlBear
               pose={isKissing ? 'kiss' : scene === 'birthday' ? 'holding_hands' : 'idle'}
               eyeState={isKissing ? 'closed' : isPlayingMusic ? 'closed' : 'open'}
@@ -292,7 +398,6 @@ export const BearCouple: React.FC<BearCoupleProps> = ({
               lookDirection="left"
               headphones={scene === 'headphones' || scene === 'headphones_kiss'}
               size="lg"
-              onClick={handleGirlClick}
             />
           </motion.div>
         </div>

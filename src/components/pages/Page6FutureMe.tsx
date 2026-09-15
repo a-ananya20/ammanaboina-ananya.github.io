@@ -38,8 +38,13 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
       {/* Top Navigation */}
       <div className="w-full flex justify-between items-center mb-6">
         <button
-          onClick={onBackToChoices}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#ffffff]/80 hover:bg-[#ffffff] text-[#78350f] text-xs font-semibold shadow-xs transition-all cursor-pointer"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBackToChoices();
+          }}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#ffffff]/90 hover:bg-[#ffffff] text-[#78350f] text-xs font-semibold shadow-xs transition-all cursor-pointer border border-[#bae6fd] active:scale-95 z-20"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to Chapters</span>
@@ -72,7 +77,7 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.6 }}
-        className="w-full my-6 p-6 sm:p-8 rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center"
+        className="w-full my-6 p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center overflow-hidden"
       >
         <div className="space-y-1 mb-4 text-center">
           <span className="text-xs font-mono uppercase tracking-widest text-[#0284c7] font-bold">
@@ -81,9 +86,11 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
           <h3 className="font-display text-xl sm:text-2xl text-[#0c4a6e] font-semibold">
             {studyScene.title}
           </h3>
-          <p className="text-xs text-[#0369a1] font-medium">
-            {studyScene.subtitle}
-          </p>
+          {studyScene.subtitle && (
+            <p className="text-xs text-[#0369a1] font-medium">
+              {studyScene.subtitle}
+            </p>
+          )}
         </div>
 
         {/* The Studying Bear Scene */}
@@ -110,7 +117,7 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.6 }}
-        className="w-full my-6 p-6 sm:p-8 rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center"
+        className="w-full my-6 p-3.5 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center overflow-hidden"
       >
         <div className="space-y-1 mb-4 text-center">
           <span className="text-xs font-mono uppercase tracking-widest text-[#0284c7] font-bold">
@@ -148,9 +155,9 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: '-40px' }}
         transition={{ duration: 0.6 }}
-        className="w-full my-6 p-6 sm:p-8 rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center"
+        className="w-full my-6 p-1.5 min-[360px]:p-2.5 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#ffffff]/90 border-2 border-[#bae6fd] shadow-md flex flex-col items-center overflow-hidden"
       >
-        <div className="space-y-1 mb-5 text-center">
+        <div className="space-y-1 mb-4 sm:mb-5 text-center px-2">
           <span className="text-xs font-mono uppercase tracking-widest text-[#0284c7] font-bold">
             Milestone 03
           </span>
@@ -163,16 +170,16 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
         </div>
 
         {/* Unified Family Portrait (Everyone gathered together in one frame) */}
-        <div className="w-full my-2 flex justify-center">
+        <div className="w-full my-1 sm:my-2 flex justify-center max-w-full overflow-hidden">
           <FamilyPortrait />
         </div>
 
-        <p className="text-xs sm:text-sm text-[#334155] max-w-lg leading-relaxed mt-4">
+        <p className="text-xs sm:text-sm text-[#334155] max-w-lg leading-relaxed mt-3 sm:mt-4 px-2">
           {familyScene.description}
         </p>
 
         {/* Scroll down indicator to letter */}
-        <div className="mt-6 flex flex-col items-center text-[#0284c7]/70">
+        <div className="mt-5 sm:mt-6 flex flex-col items-center text-[#0284c7]/70">
           <span className="text-[10px] font-bold uppercase tracking-wider">Lastly: A Letter Across Time</span>
           <ChevronDown className="w-4 h-4 animate-bounce mt-1" />
         </div>
@@ -232,7 +239,7 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 260 }}
-              className="relative bg-[#fffdfa] rounded-3xl p-6 sm:p-10 shadow-2xl border-2 border-[#bae6fd] text-left text-[#334155] space-y-4 w-full max-w-2xl"
+              className="relative bg-[#fffdfa] rounded-2xl sm:rounded-3xl p-4 sm:p-10 shadow-2xl border-2 border-[#bae6fd] text-left text-[#334155] space-y-4 w-full max-w-2xl"
               style={{
                 backgroundImage: 'radial-gradient(#e0f2fe 1.5px, transparent 1.5px)',
                 backgroundSize: '24px 24px',
@@ -319,14 +326,31 @@ export const Page6FutureMe: React.FC<Page6FutureMeProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Restart story option */}
-      <div className="mt-14 space-y-3">
+      {/* Restart & Navigation options */}
+      <div className="mt-14 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 relative z-30">
         <button
-          onClick={onRestartStory}
-          className="inline-flex items-center space-x-2 text-xs font-semibold text-[#0369a1] hover:text-[#0c4a6e] bg-[#ffffff]/80 px-4 py-2 rounded-full border border-[#bae6fd] shadow-xs cursor-pointer transition-colors"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBackToChoices();
+          }}
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-5 py-2.5 rounded-full bg-[#ffffff]/90 hover:bg-[#ffffff] text-[#78350f] text-xs font-semibold shadow-xs border border-[#cbd5e1] cursor-pointer transition-colors active:scale-95"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>Back to Chapters</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRestartStory();
+          }}
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 text-xs font-semibold text-[#0369a1] hover:text-[#0c4a6e] bg-[#ffffff]/90 hover:bg-[#ffffff] px-5 py-2.5 rounded-full border border-[#bae6fd] shadow-xs cursor-pointer transition-colors active:scale-95"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>Revisit our story from Chapter 1</span>
+          <span>Revisit our story from Front Page</span>
         </button>
       </div>
 

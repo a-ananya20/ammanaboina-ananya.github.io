@@ -1,6 +1,8 @@
 {
-  "name": "A Special Night For You",
+  "name": "ForUS",
   "description": "A cute, interactive animated bear couple love story and birthday surprise experience.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

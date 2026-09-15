@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, Volume2, VolumeX, RotateCcw } from 'lucide-react';
 import { motion } from 'motion/react';
 import { AudioTrack } from '../../types';
 
 interface CustomAudioPlayerProps {
   track: AudioTrack;
+  isPlaying?: boolean;
   onPlayStateChange?: (isPlaying: boolean) => void;
   onTrackEnded?: () => void;
   accentColor?: string;
@@ -13,12 +14,14 @@ interface CustomAudioPlayerProps {
 
 export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
   track,
+  isPlaying: controlledIsPlaying,
   onPlayStateChange,
   onTrackEnded,
   accentColor = '#f59e0b',
   idPrefix = 'player',
 }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [internalIsPlaying, setInternalIsPlaying] = useState(false);
+  const isPlaying = controlledIsPlaying !== undefined ? controlledIsPlaying : internalIsPlaying;
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(track.durationSeconds || 180);
   const [isMuted, setIsMuted] = useState(false);
@@ -28,66 +31,35 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
   const synthTimerRef = useRef<number | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
-  // Initialize or update HTML5 audio
-  useEffect(() => {
-    const audio = new Audio();
-    audio.src = track.src;
-    audio.preload = 'metadata';
-
-    const handleLoadedMetadata = () => {
-      if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
-        setDuration(Math.floor(audio.duration));
-        setIsSimulated(false);
+  // Stop all playback safely
+  const stopPlayback = useCallback(() => {
+    if (synthTimerRef.current) {
+      clearInterval(synthTimerRef.current);
+      synthTimerRef.current = null;
+    }
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+      } catch {
+        // Safe fallback
       }
-    };
+    }
+  }, []);
 
-    const handleTimeUpdate = () => {
-      setCurrentTime(Math.floor(audio.currentTime));
-    };
-
-    const handleEnded = () => {
-      setIsPlaying(false);
-      onPlayStateChange?.(false);
-      onTrackEnded?.();
-    };
-
-    const handleError = () => {
-      // Audio file not found on disk yet -> enable sweet melodic synthesizer fallback
-      setIsSimulated(true);
-    };
-
-    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
-    audio.addEventListener('timeupdate', handleTimeUpdate);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-
-    audioRef.current = audio;
-
-    return () => {
-      audio.pause();
-      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
-      audio.removeEventListener('timeupdate', handleTimeUpdate);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-      if (synthTimerRef.current) clearInterval(synthTimerRef.current);
-      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-        audioCtxRef.current.close().catch(() => {});
-      }
-    };
-  }, [track.src]);
-
-  // Melodic synthesizer for previewing before user places real MP3
-  const playLullabyNote = () => {
+  // Play melodic note safely
+  const playLullabyNote = useCallback((step: number) => {
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
         audioCtxRef.current = new AudioCtx();
       }
       const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') ctx.resume();
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
 
       const melody = [523.25, 587.33, 659.25, 783.99, 880.0, 783.99, 659.25, 587.33];
-      const noteFreq = melody[currentTime % melody.length];
+      const noteFreq = melody[step % melody.length];
 
       const now = ctx.currentTime;
       const osc = ctx.createOscillator();
@@ -108,53 +80,136 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
     } catch {
       // Audio fallback non-critical
     }
-  };
+  }, []);
 
-  const togglePlay = () => {
-    if (isPlaying) {
-      // Pause
+  // Start simulated playback cleanly
+  const startSimulatedPlayback = useCallback(() => {
+    if (synthTimerRef.current) {
+      clearInterval(synthTimerRef.current);
+      synthTimerRef.current = null;
+    }
+
+    synthTimerRef.current = window.setInterval(() => {
+      setCurrentTime((prev) => {
+        const next = prev + 1;
+        if (next >= duration) {
+          if (synthTimerRef.current) {
+            clearInterval(synthTimerRef.current);
+            synthTimerRef.current = null;
+          }
+          setTimeout(() => {
+            setInternalIsPlaying(false);
+            onPlayStateChange?.(false);
+            onTrackEnded?.();
+          }, 0);
+          return 0;
+        }
+        playLullabyNote(next);
+        return next;
+      });
+    }, 1000);
+  }, [duration, onPlayStateChange, onTrackEnded, playLullabyNote]);
+
+  // Sync external controlled isPlaying change
+  useEffect(() => {
+    if (controlledIsPlaying === undefined) return;
+
+    if (controlledIsPlaying) {
       if (audioRef.current && !isSimulated) {
-        audioRef.current.pause();
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            setIsSimulated(true);
+            startSimulatedPlayback();
+          });
+        }
+      } else {
+        startSimulatedPlayback();
       }
+    } else {
+      stopPlayback();
+    }
+  }, [controlledIsPlaying, isSimulated, startSimulatedPlayback, stopPlayback]);
+
+  // Initialize or update HTML5 audio
+  useEffect(() => {
+    const audio = new Audio();
+    const resolvedSrc = (track.src.startsWith('http://') || track.src.startsWith('https://') || track.src.startsWith('data:') || track.src.startsWith('blob:'))
+      ? track.src
+      : (track.src.startsWith('/') ? `${import.meta.env.BASE_URL || './'}${track.src.slice(1)}` : track.src);
+    audio.src = resolvedSrc;
+    audio.preload = 'metadata';
+
+    const handleLoadedMetadata = () => {
+      if (audio.duration && !isNaN(audio.duration) && audio.duration !== Infinity) {
+        setDuration(Math.floor(audio.duration));
+        setIsSimulated(false);
+      }
+    };
+
+    const handleTimeUpdate = () => {
+      setCurrentTime(Math.floor(audio.currentTime));
+    };
+
+    const handleEnded = () => {
+      setInternalIsPlaying(false);
+      onPlayStateChange?.(false);
+      onTrackEnded?.();
+    };
+
+    const handleError = () => {
+      setIsSimulated(true);
+    };
+
+    audio.addEventListener('loadedmetadata', handleLoadedMetadata);
+    audio.addEventListener('timeupdate', handleTimeUpdate);
+    audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
+
+    audioRef.current = audio;
+
+    return () => {
+      try {
+        audio.pause();
+      } catch {
+        // Safe fallback
+      }
+      audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      audio.removeEventListener('timeupdate', handleTimeUpdate);
+      audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
       if (synthTimerRef.current) {
         clearInterval(synthTimerRef.current);
         synthTimerRef.current = null;
       }
-      setIsPlaying(false);
-      onPlayStateChange?.(false);
-    } else {
-      // Play
-      setIsPlaying(true);
-      onPlayStateChange?.(true);
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        try {
+          audioCtxRef.current.close().catch(() => {});
+        } catch {
+          // Safe fallback
+        }
+      }
+    };
+  }, [track.src, onPlayStateChange, onTrackEnded]);
 
-      if (audioRef.current && !isSimulated) {
-        audioRef.current.play().catch(() => {
-          // File missing or autoplay blocked -> switch to simulated playback
-          setIsSimulated(true);
-          startSimulatedPlayback();
-        });
+  const togglePlay = () => {
+    const nextState = !isPlaying;
+    if (controlledIsPlaying === undefined) {
+      setInternalIsPlaying(nextState);
+      if (!nextState) {
+        stopPlayback();
       } else {
-        startSimulatedPlayback();
+        if (audioRef.current && !isSimulated) {
+          audioRef.current.play().catch(() => {
+            setIsSimulated(true);
+            startSimulatedPlayback();
+          });
+        } else {
+          startSimulatedPlayback();
+        }
       }
     }
-  };
-
-  const startSimulatedPlayback = () => {
-    if (synthTimerRef.current) clearInterval(synthTimerRef.current);
-
-    synthTimerRef.current = window.setInterval(() => {
-      setCurrentTime((prev) => {
-        if (prev >= duration) {
-          if (synthTimerRef.current) clearInterval(synthTimerRef.current);
-          setIsPlaying(false);
-          onPlayStateChange?.(false);
-          onTrackEnded?.();
-          return 0;
-        }
-        playLullabyNote();
-        return prev + 1;
-      });
-    }, 1000);
+    onPlayStateChange?.(nextState);
   };
 
   const toggleMute = () => {
@@ -183,14 +238,14 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
   return (
     <div
       id={`${idPrefix}-container`}
-      className="w-full max-w-lg mx-auto bg-[#ffffff]/90 border-2 border-[#fcd34d]/60 rounded-3xl p-5 sm:p-6 shadow-md backdrop-blur-sm transition-all"
+      className="w-full max-w-lg mx-auto bg-[#ffffff]/90 border-2 border-[#fcd34d]/60 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-md backdrop-blur-sm transition-all"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
         <div className="text-left space-y-0.5">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#b45309]">
+          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#b45309]">
             {track.subtitle}
           </span>
-          <h4 className="font-display text-lg sm:text-xl text-[#3d2410] font-semibold">
+          <h4 className="font-display text-base sm:text-xl text-[#3d2410] font-semibold">
             {track.title}
           </h4>
         </div>
@@ -199,14 +254,14 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
         <button
           onClick={toggleMute}
           title={isMuted ? 'Unmute' : 'Mute'}
-          className="p-2 rounded-full hover:bg-[#fef3c7] text-[#78350f] transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-full hover:bg-[#fef3c7] text-[#78350f] transition-colors cursor-pointer"
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
       </div>
 
       {/* Scrubbable Progress Bar */}
-      <div className="space-y-1 my-3">
+      <div className="space-y-1 my-2.5 sm:my-3">
         <div className="relative w-full h-2.5 bg-[#fef3c7] rounded-full overflow-hidden">
           <div
             className="absolute top-0 bottom-0 left-0 rounded-full transition-all duration-300"
@@ -239,17 +294,17 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
           whileTap={{ scale: 0.95 }}
           onClick={togglePlay}
           id={`${idPrefix}-play-btn`}
-          className="px-6 py-2.5 rounded-full text-white font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center space-x-2 cursor-pointer"
+          className="px-5 sm:px-6 py-2 sm:py-2.5 rounded-full text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all flex items-center space-x-1.5 sm:space-x-2 cursor-pointer active:scale-95"
           style={{ backgroundColor: accentColor }}
         >
           {isPlaying ? (
             <>
-              <Pause className="w-4 h-4 fill-current" />
+              <Pause className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" />
               <span>Pause</span>
             </>
           ) : (
             <>
-              <Play className="w-4 h-4 fill-current ml-0.5" />
+              <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current ml-0.5" />
               <span>Play</span>
             </>
           )}
@@ -271,7 +326,7 @@ export const CustomAudioPlayer: React.FC<CustomAudioPlayerProps> = ({
                 delay: i * 0.1,
                 ease: 'easeInOut',
               }}
-              className="w-1.5 bg-[#f59e0b] rounded-full"
+              className="w-1 min-[360px]:w-1.5 bg-[#f59e0b] rounded-full"
               style={{ height: '22px' }}
             />
           ))}

@@ -3,20 +3,62 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { PageId } from './types';
 import { PastelCanvas } from './components/PastelCanvas';
 import { Page1CrazyQuestion } from './components/pages/Page1CrazyQuestion';
 import { Page2Choices } from './components/pages/Page2Choices';
 import { Page3SongVoice } from './components/pages/Page3SongVoice';
-import { Page4OpenWhen } from './components/pages/Page4OpenWhen';
 import { Page5Birthday } from './components/pages/Page5Birthday';
 import { Page6FutureMe } from './components/pages/Page6FutureMe';
-import { DogCompanion } from './components/DogCompanion';
+
+const VALID_PAGES: PageId[] = [
+  'page1_question',
+  'page2_choices',
+  'page3_song',
+  'page5_birthday',
+  'page6_future',
+];
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageId>('page1_question');
+  const [currentPage, setCurrentPage] = useState<PageId>(() => {
+    const hash = window.location.hash.replace('#', '') as PageId;
+    return VALID_PAGES.includes(hash) ? hash : 'page1_question';
+  });
+
+  // Central navigation handler with safe browser history support
+  const navigateTo = useCallback((page: PageId, pushHistory = true) => {
+    setCurrentPage(page);
+    try {
+      if (pushHistory && typeof window !== 'undefined' && window.history?.pushState) {
+        window.history.pushState({ page }, '', `#${page}`);
+      }
+    } catch {
+      // Safe fallback for sandboxed iframes
+    }
+  }, []);
+
+  // Listen to browser Back/Forward navigation
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      try {
+        if (e.state && e.state.page && VALID_PAGES.includes(e.state.page)) {
+          setCurrentPage(e.state.page);
+        } else if (window.location.hash) {
+          const hash = window.location.hash.replace('#', '') as PageId;
+          if (VALID_PAGES.includes(hash)) {
+            setCurrentPage(hash);
+          }
+        }
+      } catch {
+        // Safe fallback
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   // Smooth scroll to top whenever page changes
   useEffect(() => {
@@ -26,8 +68,6 @@ export default function App() {
   // Canvas theme mapping
   const getTheme = () => {
     switch (currentPage) {
-      case 'page4_open_when':
-        return 'pastel-lavender';
       case 'page6_future':
         return 'pastel-sky';
       case 'page1_question':
@@ -47,64 +87,48 @@ export default function App() {
           {currentPage === 'page1_question' && (
             <motion.div
               key="page1"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <Page1CrazyQuestion
-                onYesAnswered={() => setCurrentPage('page2_choices')}
+                onYesAnswered={() => navigateTo('page2_choices')}
               />
             </motion.div>
           )}
 
-          {/* PAGE 2: THE FOUR CHOICES */}
+          {/* PAGE 2: THE CHOICES */}
           {currentPage === 'page2_choices' && (
             <motion.div
               key="page2"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <Page2Choices
-                onSelectOption={(targetPage) => setCurrentPage(targetPage)}
+                onSelectOption={(targetPage) => navigateTo(targetPage)}
+                onBackToStart={() => navigateTo('page1_question')}
               />
             </motion.div>
           )}
 
-          {/* PAGE 3: SONG / VOICE NOTE */}
+          {/* PAGE 3: SONG */}
           {currentPage === 'page3_song' && (
             <motion.div
               key="page3"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <Page3SongVoice
-                onBackToChoices={() => setCurrentPage('page2_choices')}
-                onNextChapter={() => setCurrentPage('page4_open_when')}
-              />
-            </motion.div>
-          )}
-
-          {/* PAGE 4: OPEN WHEN LETTERS */}
-          {currentPage === 'page4_open_when' && (
-            <motion.div
-              key="page4"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
-              className="w-full"
-            >
-              <Page4OpenWhen
-                onBackToChoices={() => setCurrentPage('page2_choices')}
-                onNextChapter={() => setCurrentPage('page5_birthday')}
+                onBackToChoices={() => navigateTo('page2_choices')}
+                onNextChapter={() => navigateTo('page5_birthday')}
               />
             </motion.div>
           )}
@@ -113,15 +137,15 @@ export default function App() {
           {currentPage === 'page5_birthday' && (
             <motion.div
               key="page5"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <Page5Birthday
-                onBackToChoices={() => setCurrentPage('page2_choices')}
-                onNextChapter={() => setCurrentPage('page6_future')}
+                onBackToChoices={() => navigateTo('page2_choices')}
+                onNextChapter={() => navigateTo('page6_future')}
               />
             </motion.div>
           )}
@@ -130,23 +154,20 @@ export default function App() {
           {currentPage === 'page6_future' && (
             <motion.div
               key="page6"
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.6 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}
               className="w-full"
             >
               <Page6FutureMe
-                onBackToChoices={() => setCurrentPage('page2_choices')}
-                onRestartStory={() => setCurrentPage('page1_question')}
+                onBackToChoices={() => navigateTo('page2_choices')}
+                onRestartStory={() => navigateTo('page1_question')}
               />
             </motion.div>
           )}
         </AnimatePresence>
       </main>
-
-      {/* Floating Dog Companion in the bottom corner with playful inside jokes */}
-      <DogCompanion mode="floating" />
     </PastelCanvas>
   );
 }

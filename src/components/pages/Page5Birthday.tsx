@@ -80,17 +80,23 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
       className="relative min-h-[90vh] flex flex-col items-center justify-center px-4 py-8 max-w-4xl mx-auto text-center"
     >
       {/* Navigation Header */}
-      <div className="w-full flex justify-between items-center mb-6">
+      <div className="w-full flex justify-between items-center mb-6 gap-2">
         <button
-          onClick={onBackToChoices}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-[#ffffff]/80 hover:bg-[#ffffff] text-[#78350f] text-xs font-semibold shadow-xs transition-all cursor-pointer"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBackToChoices();
+          }}
+          className="inline-flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 rounded-full bg-[#ffffff]/90 hover:bg-[#ffffff] text-[#78350f] text-xs font-semibold shadow-xs transition-all cursor-pointer border border-[#fecaca] active:scale-95 z-20 shrink-0"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Back to Chapters</span>
+          <span><span className="hidden min-[380px]:inline">Back to </span>Chapters</span>
         </button>
 
-        <span className="text-xs font-bold text-[#e11d48] bg-[#fee2e2] px-3 py-1 rounded-full border border-[#fecaca]">
-          Chapter 3: Birthday Celebration
+        <span className="text-[11px] sm:text-xs font-bold text-[#e11d48] bg-[#fee2e2] px-2.5 sm:px-3 py-1 rounded-full border border-[#fecaca] whitespace-nowrap">
+          <span className="min-[380px]:hidden">Birthday</span>
+          <span className="hidden min-[380px]:inline">Chapter 3: Birthday Celebration</span>
         </span>
       </div>
 
@@ -98,12 +104,12 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-2 mb-6"
+        className="space-y-2 mb-6 px-2"
       >
-        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-[#881337] font-semibold tracking-wide">
+        <h2 className="font-display text-2xl sm:text-3xl md:text-4xl text-[#881337] font-semibold tracking-wide leading-tight">
           {allCandlesLit ? BIRTHDAY_DATA.celebrationTitle : BIRTHDAY_DATA.cakePrompt}
         </h2>
-        <p className="text-xs sm:text-sm text-[#9f1239] font-medium">
+        <p className="text-xs sm:text-sm text-[#9f1239] font-medium max-w-md mx-auto">
           {allCandlesLit
             ? "Every candle is glowing with all my love for you!"
             : BIRTHDAY_DATA.candlesPromptSubtitle}
@@ -111,9 +117,9 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
       </motion.div>
 
       {/* INTERACTIVE BIRTHDAY CAKE WITH 3 CLICKABLE CANDLES */}
-      <div className="relative my-4 flex flex-col items-center">
+      <div className="relative my-4 flex flex-col items-center max-w-full">
         {/* The 3 Candles on top of cake */}
-        <div className="flex items-end justify-center space-x-6 mb-1 z-20">
+        <div className="flex items-end justify-center space-x-5 sm:space-x-6 mb-1 z-20">
           {[0, 1, 2].map((idx) => {
             const isLit = litCandles[idx];
             return (
@@ -160,27 +166,27 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
         </div>
 
         {/* Cake Tiers */}
-        <div className="relative flex flex-col items-center z-10">
+        <div className="relative flex flex-col items-center z-10 max-w-full">
           {/* Top Layer */}
-          <div className="w-48 sm:w-56 h-14 bg-gradient-to-r from-[#fed7aa] via-[#ffedd5] to-[#fed7aa] rounded-t-2xl border-2 border-[#fdba74] shadow-sm flex items-center justify-center relative overflow-hidden">
+          <div className="w-44 min-[360px]:w-48 sm:w-56 h-12 sm:h-14 bg-gradient-to-r from-[#fed7aa] via-[#ffedd5] to-[#fed7aa] rounded-t-2xl border-2 border-[#fdba74] shadow-sm flex items-center justify-center relative overflow-hidden">
             {/* Strawberry frosting scallops */}
-            <div className="absolute top-0 inset-x-0 h-4 bg-[#f472b6] rounded-b-xl opacity-80" />
-            <span className="font-handwritten text-lg text-[#9a3412] font-bold mt-2">
+            <div className="absolute top-0 inset-x-0 h-3.5 sm:h-4 bg-[#f472b6] rounded-b-xl opacity-80" />
+            <span className="font-handwritten text-base sm:text-lg text-[#9a3412] font-bold mt-1.5 sm:mt-2">
               For My Love ❤️
             </span>
           </div>
 
           {/* Bottom Layer */}
-          <div className="w-60 sm:w-72 h-16 bg-gradient-to-r from-[#fbcfe8] via-[#fdf2f8] to-[#fbcfe8] border-2 border-[#f472b6] rounded-t-xl rounded-b-2xl shadow-md flex items-center justify-around px-4">
-            <span className="text-sm">🍓</span>
-            <span className="text-sm">✨</span>
-            <span className="text-sm">🍓</span>
-            <span className="text-sm">✨</span>
-            <span className="text-sm">🍓</span>
+          <div className="w-56 min-[360px]:w-60 sm:w-72 h-14 sm:h-16 bg-gradient-to-r from-[#fbcfe8] via-[#fdf2f8] to-[#fbcfe8] border-2 border-[#f472b6] rounded-t-xl rounded-b-2xl shadow-md flex items-center justify-around px-3 sm:px-4">
+            <span className="text-xs sm:text-sm">🍓</span>
+            <span className="text-xs sm:text-sm">✨</span>
+            <span className="text-xs sm:text-sm">🍓</span>
+            <span className="text-xs sm:text-sm">✨</span>
+            <span className="text-xs sm:text-sm">🍓</span>
           </div>
 
           {/* Cake Stand */}
-          <div className="w-68 sm:w-80 h-3 bg-[#e2e8f0] rounded-full border border-[#cbd5e1] shadow-xs -mt-0.5" />
+          <div className="w-60 min-[360px]:w-64 sm:w-80 max-w-[92vw] h-3 bg-[#e2e8f0] rounded-full border border-[#cbd5e1] shadow-xs -mt-0.5" />
         </div>
 
         {/* Quick button to light all candles if user wants */}
@@ -230,7 +236,7 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.7 }}
-            className="w-full max-w-lg mx-auto bg-[#ffffff]/95 border-2 border-[#fecaca] rounded-3xl p-6 sm:p-8 shadow-xl text-left space-y-4 my-6"
+            className="w-full max-w-lg mx-auto bg-[#ffffff]/95 border-2 border-[#fecaca] rounded-2xl sm:rounded-3xl p-4 sm:p-8 shadow-xl text-left space-y-3 sm:space-y-4 my-6"
           >
             <div className="flex items-center space-x-2 pb-2 border-b border-[#fecaca] text-[#e11d48] font-bold text-sm">
               <Heart className="w-4 h-4 fill-current text-[#f43f5e]" />
@@ -246,13 +252,30 @@ export const Page5Birthday: React.FC<Page5BirthdayProps> = ({
         )}
       </AnimatePresence>
 
-      {/* Navigation to final chapter */}
-      <div className="mt-8 flex items-center justify-center">
+      {/* Navigation buttons */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 relative z-30">
         <button
-          onClick={onNextChapter}
-          className="px-7 py-3 rounded-full bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center space-x-2"
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onBackToChoices();
+          }}
+          className="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-3 rounded-full bg-[#ffffff]/90 hover:bg-[#ffffff] text-[#78350f] font-semibold text-sm shadow-xs border border-[#fecaca] transition-all cursor-pointer active:scale-95"
         >
-          <span>Next: Message From Future Me 📩</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Chapters</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onNextChapter();
+          }}
+          className="w-full sm:w-auto px-7 py-3 rounded-full bg-gradient-to-r from-[#e11d48] to-[#f43f5e] hover:from-[#be123c] hover:to-[#e11d48] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center space-x-2 active:scale-95"
+        >
+          <span>Next: Future Us 💫 →</span>
         </button>
       </div>
 
